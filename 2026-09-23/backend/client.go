@@ -114,12 +114,21 @@ func (c *Client) writePump() {
 			}
 
 			jsonMsg, err := json.Marshal(message)
+			if err != nil {
+				slog.Error("failed to marshal message", "error", err)
+				w.Close()
+				return
+			}
 			w.Write(jsonMsg)
 
 			n := len(c.send)
 			for i := 0; i < n; i++ {
+				jsonMsg, err := json.Marshal(<-c.send)
+				if err != nil {
+					slog.Error("failed to marshal message", "error", err)
+					continue
+				}
 				w.Write([]byte{'\n'})
-				jsonMsg, _ := json.Marshal(<-c.send)
 				w.Write(jsonMsg)
 			}
 

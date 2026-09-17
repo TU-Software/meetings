@@ -1,0 +1,45 @@
+#root {
+  width: 100%;
+  max-width: 100%;
+  border-inline: none;
+  text-align: left;
+}
+
+/* ── Shared input / button styles ─────────────────────────── */
+
+input[type="text"] {
+  font: inherit;
+  font-size: 15px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-h);
+  outline: none;
+  transition: border-color 0.15s;
+
+  &:focus {
+    border-color: var(--accent);
+  }
+}
+
+button {
+  font: inherit;
+  font-size: 15px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+}

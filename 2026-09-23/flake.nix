@@ -7,27 +7,33 @@
   };
 
   outputs =
-    { nixpkgs, go-overlay, ... }:
-    let
-      system = "x86_64-linux";
-      pkgs = import nixpkgs {
-        inherit system;
-        overlays = [ go-overlay.overlays.default ];
-      };
-      go = pkgs.go-bin.fromGoMod ./backend/go.mod;
-    in
-    {
-      formatter.x86_64-linux = pkgs.alejandra;
-      devShells.x86_64-linux.default = pkgs.mkShell {
-        buildInputs = [
-          pkgs.nixd
-          pkgs.nil
+  { nixpkgs, go-overlay, ... }:
+  let
+  system = "x86_64-linux";
+  pkgs = import nixpkgs {
+    inherit system;
+    overlays = [ go-overlay.overlays.default ];
+  };
+  go = pkgs.go-bin.fromGoMod ./backend/go.mod;
+  go-migrate-pg = pkgs.go-migrate.overrideAttrs (oldAttrs: {
+    tags = [ "postgres" ];
+  });
 
-          go.withDefaultTools
-          pkgs.jq
+  in
+  {
+    formatter.x86_64-linux = pkgs.alejandra;
+    devShells.x86_64-linux.default = pkgs.mkShell {
+      buildInputs = [
+        pkgs.nixd
+        pkgs.nil
 
-          pkgs.bun
-        ];
-      };
+        go.withDefaultTools
+        pkgs.sqlc
+        go-migrate-pg
+        pkgs.jq
+
+        pkgs.bun
+      ];
     };
+  };
 }

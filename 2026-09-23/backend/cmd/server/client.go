@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"uuid"
 
 	"github.com/gorilla/websocket"
 )
@@ -32,7 +33,7 @@ type Client struct {
 
 	send     chan *OutboundMessage
 	username string
-	rooms    map[string]bool
+	rooms    map[uuid.UUID]bool
 
 	once sync.Once
 }
@@ -73,18 +74,18 @@ func (c *Client) readPump() {
 
 		switch msg.Action {
 		case ActionJoinRoom:
-			if msg.Room != "" {
-				c.hub.join <- &RoomRequest{client: c, room: msg.Room}
+			if msg.RoomID != uuid.Nil() {
+				c.hub.join <- &RoomRequest{client: c, roomID: msg.RoomID}
 			}
 		case ActionLeaveRoom:
-			if msg.Room != "" {
-				c.hub.leave <- &RoomRequest{client: c, room: msg.Room}
+			if msg.RoomID != uuid.Nil() && c.rooms[msg.RoomID] {
+				c.hub.leave <- &RoomRequest{client: c, roomID: msg.RoomID}
 			}
 		case ActionSendMessage:
-			if msg.Room != "" && msg.Content != "" && c.rooms[msg.Room] {
+			if msg.RoomID != uuid.Nil() && msg.Content != "" && c.rooms[msg.RoomID] {
 				c.hub.broadcast <- &OutboundMessage{
+					RoomID:  msg.RoomID,
 					Sender:  c.username,
-					Room:    msg.Room,
 					Content: msg.Content,
 				}
 			}

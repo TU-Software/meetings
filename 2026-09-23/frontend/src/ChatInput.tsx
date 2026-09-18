@@ -3,10 +3,11 @@ import './ChatInput.css'
 
 interface Props {
   onSend: (content: string) => void
+  roomName?: string
   disabled?: boolean
 }
 
-export function ChatInput({ onSend, disabled = false }: Props) {
+export function ChatInput({ onSend, roomName, disabled = false }: Props) {
   const [value, setValue] = useState('')
 
   function handleSubmit(e: React.FormEvent) {
@@ -21,7 +22,7 @@ export function ChatInput({ onSend, disabled = false }: Props) {
     <form className="chat-input" onSubmit={handleSubmit}>
       <input
         type="text"
-        placeholder="Message #general"
+        placeholder={roomName ? `Message #${roomName}` : 'Select a room…'}
         value={value}
         onChange={e => setValue(e.target.value)}
         disabled={disabled}

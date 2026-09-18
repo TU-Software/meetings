@@ -10,6 +10,11 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+	"uuid"
+
+	"github.com/jackc/pgx/v5/pgxpool"
+
+	db "github.com/TU-Software/meetings/2026-09-23/gen/db"
 )
 
 func main() {
@@ -23,11 +28,38 @@ func main() {
 		hostname = "unknown-host"
 	}
 
-	hub := NewHub()
+	// Database
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		slog.Error("DATABASE_URL is not set")
+		os.Exit(1)
+	}
+
+	pool, err := pgxpool.New(context.Background(), databaseURL)
+	if err != nil {
+		slog.Error("failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	defer pool.Close()
+
+	if err := pool.Ping(context.Background()); err != nil {
+		slog.Error("failed to ping database", "error", err)
+		os.Exit(1)
+	}
+
+	queries := db.New(pool)
+
+	// Hub
+	hub := NewHub(queries)
 	go hub.Run()
 
-	// routes
+	// Routes
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("GET /api/rooms", handleListRooms(queries))
+	mux.HandleFunc("POST /api/rooms", handleCreateRoom(queries, hub))
+	mux.HandleFunc("GET /api/rooms/{id}", handleGetRoomMessages(queries))
+
 	mux.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
 		username := r.URL.Query().Get("username")
 		if username == "" {
@@ -47,7 +79,7 @@ func main() {
 			conn:     conn,
 			send:     make(chan *OutboundMessage, 256),
 			username: username,
-			rooms:    make(map[string]bool),
+			rooms:    make(map[uuid.UUID]bool),
 		}
 
 		client.hub.register <- client
@@ -65,7 +97,7 @@ func main() {
 		Handler: mux,
 	}
 
-	// graceful shutdown
+	// Graceful shutdown
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
@@ -83,7 +115,7 @@ func main() {
 	defer cancel()
 
 	if err := server.Shutdown(shutdownCtx); err != nil {
-		slog.Error("server failed to shudown", "error", err)
+		slog.Error("server failed to shutdown", "error", err)
 		os.Exit(1)
 	}
 

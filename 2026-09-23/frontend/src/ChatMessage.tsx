@@ -1,17 +1,12 @@
-import type { OutboundMessage } from './Client.ts'
+import type { ChatMessage as ChatMessageType } from './Client.ts'
 import './ChatMessage.css'
 
 interface Props {
-  message: OutboundMessage
-  /** The local user's username, used to style own messages differently. */
+  message: ChatMessageType
   currentUser: string
 }
 
 export function ChatMessage({ message, currentUser }: Props) {
-  if (message.system) {
-    return <div className="chat-message system">{message.content}</div>
-  }
-
   const isOwn = message.sender === currentUser
 
   return (

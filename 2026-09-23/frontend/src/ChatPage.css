@@ -1,10 +1,15 @@
 .chat-page {
   display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+}
+
+.chat-main {
+  flex: 1;
+  display: flex;
   flex-direction: column;
-  height: 100svh;
-  max-width: 720px;
-  margin: 0 auto;
-  border-inline: 1px solid var(--border);
+  min-width: 0;
 }
 
 .chat-header {
@@ -19,6 +24,11 @@
     font-size: 16px;
     font-weight: 600;
     color: var(--text-h);
+
+    &.muted {
+      color: var(--text);
+      font-weight: 400;
+    }
   }
 
   .you {
@@ -35,4 +45,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
+}
+
+.chat-empty {
+  margin: auto;
+  color: var(--text);
+  font-size: 14px;
 }

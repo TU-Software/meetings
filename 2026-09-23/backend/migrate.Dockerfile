@@ -17,10 +17,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o chat_migrate \
     ./cmd/migrate
 
-FROM alpine:3.24 AS server
+FROM alpine:3.24 AS migrate
 
 WORKDIR /app
 
-COPY --from=builder /app/chat_backend .
+COPY --from=builder /app/chat_migrate .
 
-CMD [ "/app/chat_backend" ]
+CMD [ "/app/chat_migrate", "up" ]

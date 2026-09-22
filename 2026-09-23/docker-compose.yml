@@ -23,8 +23,7 @@ services:
   migrate:
     build:
       context: ./backend
-      dockerfile: Dockerfile
-      target: migrate
+      dockerfile: migrate.Dockerfile
     environment:
       DATABASE_URL: "postgres://chat:chat@db:5432/chat"
     depends_on:
@@ -36,7 +35,6 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
-      target: server
     environment:
       PORT: "8080"
       DATABASE_URL: "postgres://chat:chat@db:5432/chat"

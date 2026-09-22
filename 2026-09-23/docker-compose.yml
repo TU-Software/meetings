@@ -40,5 +40,5 @@ services:
     depends_on:
       - frontend
 
-volumes:
+volumes: # use volumes for data persistence, remember that writable upper-dir in OverlayFS does not persist if your container is deleted
   db_data:

@@ -16,6 +16,9 @@ FROM alpine:3.24 AS server
 
 WORKDIR /app
 
+RUN addgroup -S app && adduser -S app -G app
+USER app
+
 COPY --from=builder /app/chat_backend .
 
 CMD [ "/app/chat_backend" ]

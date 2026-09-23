@@ -38,6 +38,9 @@ RUN go mod download
 COPY ./gen gen/
 COPY ./cmd cmd/
 
+RUN addgroup -S app && adduser -S app -G app
+USER app
+
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -o chat_backend \
     ./cmd/server
@@ -103,8 +106,6 @@ services:
 +   environment:
 +     PORT: "8080"
 +     DATABASE_URL: "postgres://chat:chat@db:5432/chat"
-+   ports:
-+     - "8081:8080"
 +   depends_on:
 +     db:
 +       condition: service_healthy
